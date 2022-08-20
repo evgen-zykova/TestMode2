@@ -6,6 +6,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import lombok.Value;
 
 import java.util.Locale;
 
@@ -24,11 +25,11 @@ public class DataGenerator {
     private DataGenerator() {
     }
 
-    private static void sendRequest(UserInfo userInfo) {
+    private static void sendRequest(UserInfo user) {
         // сам запрос
         given() // "дано"
                 .spec(requestSpec) // указываем, какую спецификацию используем
-                .body(userInfo) // передаём в теле объект, который будет преобразован в JSON
+                .body(user) // передаём в теле объект, который будет преобразован в JSON
                 .when() // "когда"
                 .post("/api/system/users") // на какой путь, относительно BaseUri отправляем запрос
                 .then() // "тогда ожидаем"
@@ -47,29 +48,27 @@ public class DataGenerator {
         private Registration() {
         }
 
-        public static UserInfo getActiveUser() {
-            UserInfo userInfo = new UserInfo(getRandomLogin(), getRandomPassword(), "active");
-            sendRequest(userInfo);
-            return userInfo;
+        public static UserInfo getUser(String status) {
+            // TODO: создать пользователя user используя методы getRandomLogin(), getRandomPassword() и параметр status
+            UserInfo user = new UserInfo(getRandomLogin(), getRandomPassword(), status);
+            return user;
         }
 
-        public static UserInfo getBlockedUser() {
-            UserInfo userInfo = new UserInfo(getRandomLogin(), getRandomPassword(), "blocked");
-            sendRequest(userInfo);
-            return userInfo;
+        public static UserInfo getRegisteredUser(String status) {
+            // TODO: объявить переменную registeredUser и присвоить ей значение возвращённое getUser(status).
+            // Послать запрос на регистрацию пользователя с помощью вызова sendRequest(registeredUser)
+            UserInfo registeredUser = getUser(status);
+            sendRequest(registeredUser);
+            return registeredUser;
         }
 
-        public static UserInfo getInvalidPasswordUser(String status) {
-            String login = getRandomLogin();
-            sendRequest(new UserInfo(login, getRandomPassword(), status));
-            return new UserInfo(login, getRandomPassword(), status);
-        }
+    }
 
-        public static UserInfo getInvalidLoginUser(String status) {
-            String password = getRandomPassword();
-            sendRequest(new UserInfo(getRandomLogin(), password, status));
-            return new UserInfo(getRandomLogin(), password, status);
-        }
+    @Value
+    public static class UserInfo {
+        String login;
+        String password;
+        String status;
     }
 }
 
